@@ -1,0 +1,1 @@
+{"version":3,"file":"static/css/main.292dc446.css","mappings":"AAAA,UAEE,wBAAyB,CADzB,QAGF,CAEA,KAEE,eAAe,CADf,cAEF","sources":["index.css"],"sourcesContent":["body, html {\n  margin:0;\n  background-color: #dde8f2;\n\n}\n\nbody{\n  min-width:100%;\n  min-height:100%;\n}\n"],"names":[],"sourceRoot":""}
