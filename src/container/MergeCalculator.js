@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Josa from 'josa-js'
 import ChipSelector from "../component/ChipSelector";
 
 import { Box,  Grid, Stack, Typography } from "@mui/material";
@@ -14,6 +15,9 @@ import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import PriceCheckIcon from '@mui/icons-material/PriceCheck';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import ForestIcon from '@mui/icons-material/Forest';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+
+
 
 import bgPath from "./bg.avif";
 
@@ -63,7 +67,10 @@ const CalculatorForm = ({ formState, onChange }) => {
 
   const handleInputChange = ({ target }) => {
     let { name, value, type } = target;
-    if (type === "number") value *= 1
+    if (type === "number"){
+      value *= 1
+      if(value < 0) value *= -1
+    }
     onChange(name, value)
   }
 
@@ -95,7 +102,7 @@ const CalculatorForm = ({ formState, onChange }) => {
           <TextField fullWidth
             label={`현재 ${name}룽 가격`}
             onChange={handleInputChange}
-            value={cost}
+            value={cost.toString()}
             {...numberFormParams({ unit: "골드", id: "cost" })}
           />
           <TextField fullWidth
@@ -116,15 +123,15 @@ const CalculatorForm = ({ formState, onChange }) => {
               const handleHandsChange = ({ target }) => {
                 let { value } = target
                 let thisHands = hands.concat();
+                if(value < 0) value *= -1
                 thisHands[i] = value * 1
                 onChange('hands', thisHands)
               }
-
               return <Grid item xs={6} md={4} key={i}>
                 <TextField fullWidth
                   key={i}
                   label={`${prefix(name)} 보유 갯수(Lv.${i})`}
-                  value={hands[i]}
+                  value={hands[i].toString()}
                   {...numberFormParams({ unit: "개", id: `hand-${i + 1}` })}
                   onChange={handleHandsChange}
                 />
@@ -148,7 +155,7 @@ const CalculatorForm = ({ formState, onChange }) => {
             <TextField
               label={`목표 갯수`}
               onChange={handleInputChange}
-              value={goalCount}
+              value={goalCount.toString()}
               {...numberFormParams({ unit: "개", id: "goalCount" })}
             />
           </Grid>
@@ -178,9 +185,10 @@ const mergeStratgy = (initParam, params) => {
 
   const { hands, steps } = params // ,buyCount
   if (goal === 0) {
-    params.buyCount += goalCount - hands[0]
+    let buyed = goalCount - hands[0]
+    params.buyCount += buyed
     hands[0] = goalCount
-    steps.push([0, goalCount, hands.concat()])
+    steps.push([0, buyed, hands.concat()])
   } else {
     while (true) {
       if (!canOverBuy && goalCount - hands[goal] === 1) {
@@ -202,6 +210,7 @@ const mergeStratgy = (initParam, params) => {
 
 const CalculatorResult = ({ formState }) => {
   const { name, cost, hands, goal, goalCount, only5Merge } = formState
+  
   const interval = kungya.getCostByName(name)
 
 
@@ -243,20 +252,23 @@ const CalculatorResult = ({ formState }) => {
       if(price < mass) continue
       return {
         unit,
-        amount:Math.ceil(price/mass)
+        amount:mass === 0 ? 0 : Math.ceil(price/mass)
       }
     }
+    return {
+      unit: '-',
+      amount:''
+    }
   }
-
   let {unit, amount:unitAmount} = priceToUnit(price)
-
+  let preventNaN = (value) => value.match(/NaN/) ? "-" : value
   return (<>
     <Section label={<DividerTitle>계산 결과</DividerTitle>}>
       <ItemList>
         <Item icon={<InventoryIcon />} label={`필요 ${name}룽`} value={`${buyCount.toLocaleString()}개`} />
-        <Item icon={<LocalOfferIcon />} label={`${name}룽 최종가격`} value={isNaN(price) ? "-" : `${lastCost.toLocaleString()}골드`} />
-        <Item icon={<PriceCheckIcon />} label={`필요 골드`} value={isNaN(price) ? "-" : price.toLocaleString() + "골드"} />
-        <Item icon={<ForestIcon />} label={`필요 재화`} value={`${unit} ${unitAmount}개`} />
+        <Item icon={<LocalOfferIcon />} label={`${name}룽 최종가격`} value={preventNaN(`${lastCost.toLocaleString()}골드`)} />
+        <Item icon={<PriceCheckIcon />} label={`필요 골드`} value={preventNaN(price.toLocaleString() + "골드")} />
+        <Item icon={<ForestIcon />} label={`필요 재화`} value={preventNaN(`${unit} ${unitAmount.toLocaleString() }개`)} />
       </ItemList>
     </Section>
 
@@ -264,23 +276,35 @@ const CalculatorResult = ({ formState }) => {
       labelonHide="머지 과정 보기"
       labelonShow="머지 과정 숨기기"
     >
-      <CalculatorStepper steps={steps} name={name} />
+      <CalculatorStepper steps={steps} name={name} limit={300} />
     </HidableSection>
   </>)
 }
 
-
-const CalculatorStepper = ({ steps, name }) => {
+const CalculatorStepper = ({ steps, name,limit }) => {
   let [activeStep, setActiveStep] = useState(0);
   const handleNext = () => setActiveStep(activeStep + 1)
   const handleBack = () => setActiveStep(activeStep - 1)
+  if( steps.length > limit ){
+    return (<Stack direction="row" spacing={2} alignItems="end" justifyContent="center">
+      
+      <Typography variant="body2" color="text.secondary" > 
+      <ErrorOutlineIcon color="text.secondary" />
+      머지횟수 {limit}회 초과로 머지과정 확인이 비활성화 되었습니다.</Typography>
+    </Stack>)
+  }
   return (
     <Stepper orientation="vertical" activeStep={activeStep}>
       {steps.map(([lv, count, hands], index) => {
-        let prefix = kungya.prefixes[lv]
+        let getFullName = (lv) => {
+          let prefix = kungya.prefixes[lv]
+          if( lv === 0 ) return prefix(name)
+          return `${prefix(name)}(Lv.${lv})`
+        }
+
         let description = lv ?
-          `Lv.${lv} ${prefix(name)}를 ${count}머지` :
-          `${prefix(name)}을 ${count}개 구매`
+          `${Josa.r(getFullName(lv - 1) || "",'을를')} ${count}머지` :
+          `${getFullName(lv)}을 ${count}개 구매`
         let label = description
         let inventory = hands.map((c, i) => `${i === 0 ? "룽" : `Lv.${i}`} ${c}개`).join(", ")
         return <Step key={index}>
