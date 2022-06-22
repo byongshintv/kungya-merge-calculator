@@ -15,8 +15,7 @@ import PriceCheckIcon from '@mui/icons-material/PriceCheck';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import ForestIcon from '@mui/icons-material/Forest';
 
-import bgPath from "./bg.jpg";
-
+import bgPath from "./bg.avif";
 
 import { blue } from '@mui/material/colors';
 import Section, { HidableSection } from '../component/Section';
@@ -158,7 +157,11 @@ const CalculatorForm = ({ formState, onChange }) => {
               <FormLabel>머지 방식</FormLabel>
               <Stack direction="row" spacing={1} alignItems="center" sx={{ marginLeft: 2 }}>
                 <Text>무지성 5머지</Text>
-                <Switch checked={!only5Merge} onChange={(e, value) => onChange('only5Merge', !value)} name="only5Merge" />
+                <Switch 
+                  checked={!only5Merge} onChange={(e, value) => onChange('only5Merge', !value)} 
+                  name="only5Merge"
+                  inputProps={{'aria-label': "머지 방식에 대한 스위치"}}
+                />
                 <Text>가장 빠른 획득</Text>
               </Stack>
             </Box>
