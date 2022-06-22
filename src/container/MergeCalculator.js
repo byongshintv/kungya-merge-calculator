@@ -198,6 +198,7 @@ const mergeStratgy = (initParam, params) => {
 }
 
 const CalculatorResult = ({ formState }) => {
+  console.log(formState)
   const { name, cost, hands, goal, goalCount, only5Merge } = formState
   const interval = kungya.getCostByName(name)
 
