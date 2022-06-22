@@ -1,10 +1,10 @@
 import { Typography, Box, Chip, Stack} from "@mui/material";
 
-const ChipSelector = ({ items, selected = items[0], onSelected, label}) => {
+const ChipSelector = ({ items, selected = items[0], onSelected, label, ...props}) => {
     if (items.length === 0) return (<Stack></Stack>)
     return (
-      <Box sx={{marginBottom:1}}>
-        <Typography variant="body2" color="text.secondary" sx={{marginBottom:0.5}}>
+      <Box sx={{mb:4}} {...props}>
+        <Typography variant="body2" color="text.secondary" sx={{mb:0.5}}>
           {label}
         </Typography>
           {

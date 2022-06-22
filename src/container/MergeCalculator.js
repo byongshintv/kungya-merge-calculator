@@ -6,19 +6,21 @@ import { Card, CardContent, CardMedia } from "@mui/material";
 import { TextField, InputAdornment, Switch, Button, IconButton } from "@mui/material";
 import { Avatar } from "@mui/material";
 import { List, ListItem, ListItemText, ListItemAvatar } from "@mui/material";
+import { Stepper, Step, StepLabel, StepContent } from '@mui/material';
+
 
 import InventoryIcon from '@mui/icons-material/Inventory';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import PriceCheckIcon from '@mui/icons-material/PriceCheck';
 import GitHubIcon from '@mui/icons-material/GitHub';
-import Stepper from '@mui/material/Stepper';
-import Step from '@mui/material/Step';
-import StepLabel from '@mui/material/StepLabel';
-import StepContent from '@mui/material/StepContent';
+import ForestIcon from '@mui/icons-material/Forest';
+
 import bgPath from "./bg.jpg";
+
 
 import { blue } from '@mui/material/colors';
 import Section, { HidableSection } from '../component/Section';
+import DividerTitle from '../component/DividerTitle';
 const kungya = {
   prefixes: [
     (name) => `${name}룽`,
@@ -81,6 +83,7 @@ const CalculatorForm = ({ formState, onChange }) => {
       noValidate
       autoComplete="off"
     >
+      <DividerTitle>데이터 입력</DividerTitle>
       <Section label="쿵야 선택">
         <ChipSelector
           items={kungya.getAllKungyaNames()}
@@ -200,7 +203,10 @@ const CalculatorResult = ({ formState }) => {
 
 
   const ItemList = ({ children }) => (
-    <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
+    <List 
+      sx={{ 
+        bgcolor: 'background.paper', 
+        display:'grid', gridTemplateColumns:{sx:'1f',sm:'1fr 1fr'} }}>
       {children}
     </List>
   )
@@ -216,12 +222,38 @@ const CalculatorResult = ({ formState }) => {
   const { steps, buyCount } = mergeStratgy({ hands, goal, goalCount, canOverBuy: only5Merge })
   const lastCost = cost + interval * buyCount
   const price = (cost + (lastCost - interval)) / 2 * buyCount
+
+  
+  const priceUnits = [
+    ['작은 동전', 1],
+    ['작은 은화', 4],
+    ['작은 금화', 16],
+    ['오르카 동전', 55],
+    ['오르카 은화', 185],
+    ['오르카 금화', 600],
+    ['오르카 기념주화', 1900],
+    ['금화 주머니', 6000],
+    ['금화상자', 18000],
+  ]
+  function priceToUnit(price){
+    for(let [unit,mass] of priceUnits.reverse()){
+      if(price < mass) continue
+      return {
+        unit,
+        amount:Math.ceil(price/mass)
+      }
+    }
+  }
+
+  let {unit, amount:unitAmount} = priceToUnit(price)
+
   return (<>
-    <Section label="계산 결과">
+    <Section label={<DividerTitle>계산 결과</DividerTitle>}>
       <ItemList>
-        <Item icon={<InventoryIcon />} label={`필요 ${name}룽`} value={`${buyCount}개`} />
+        <Item icon={<InventoryIcon />} label={`필요 ${name}룽`} value={`${buyCount.toLocaleString()}개`} />
+        <Item icon={<LocalOfferIcon />} label={`${name}룽 최종가격`} value={isNaN(price) ? "-" : `${lastCost.toLocaleString()}골드`} />
         <Item icon={<PriceCheckIcon />} label={`필요 골드`} value={isNaN(price) ? "-" : price.toLocaleString() + "골드"} />
-        <Item icon={<LocalOfferIcon />} label={`${name}룽 최종가격`} value={isNaN(price) ? "-" : `${lastCost}골드`} />
+        <Item icon={<ForestIcon />} label={`필요 재화`} value={`${unit} ${unitAmount}개`} />
       </ItemList>
     </Section>
 

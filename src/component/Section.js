@@ -1,14 +1,14 @@
 import { useState } from 'react';
 
-import { Box } from "@mui/material";
-import { Divider, Chip } from "@mui/material";
-
-const Section = ({ children, label, ...props }) => (
-    <Box sx={{ mb: 1, mt: 1, ml:{sm:1,xs:0}, mr:{sm:1,xs:0}}}>
-      <Divider sx={{ marginBottom: 2 }}><Chip label={label} {...props} /></Divider>
+import { Box,Typography } from "@mui/material";
+import DividerTitle from './DividerTitle';
+const Section = ({ children, label, ...props }) => {
+  const Title = () => typeof label === "string" ? <Typography component="h2" variant='h6' sx={{mb:2}}>{label}</Typography>  : label
+   return <Box sx={{ mb: 4, mt: 4, ml:{sm:1,xs:0}, mr:{sm:1,xs:0}}}>
+      <Title />
       {children}
     </Box>
-  )
+  }
   
   const HidableSection = ({ children, label, labelonHide, labelonShow, ...props }) => {
     let [isShow, setIsShow] = useState(false);
@@ -18,7 +18,10 @@ const Section = ({ children, label, ...props }) => (
       label = labelonHide || label 
     }
     let handleShowSteps = () => setIsShow(!isShow)
-    return <Section color={isShow ? "default" : "primary"} label={label} onClick={handleShowSteps} {...props}>
+    return <Section
+        label={<DividerTitle onClick={handleShowSteps} color={isShow ? "default" : "primary"} >{label}</DividerTitle>}
+        
+       {...props}>
       {isShow && children}
     </Section>
   }
