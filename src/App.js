@@ -1,25 +1,11 @@
-import logo from './logo.svg';
-import './App.css';
+import MergeCalculator from "./container/MergeCalculator";
+import Container from '@mui/material/Container'
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+
+  return (  <Container maxWidth="md" sx={{mt:{xs:2,sm:6},mb:{xs:2,sm:6}}} >
+  <MergeCalculator />
+</Container>)
 }
 
 export default App;
