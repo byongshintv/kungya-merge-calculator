@@ -61,7 +61,8 @@ const CalculatorForm = ({ formState, onChange }) => {
     },
     InputProps: {
       endAdornment: <InputAdornment position="end">{unit}</InputAdornment>,
-    }
+    },
+    onFocus:e => e.target.select(),
   })
   const { name, cost, hands, goal, goalCount, only5Merge } = formState
 
@@ -106,7 +107,6 @@ const CalculatorForm = ({ formState, onChange }) => {
             {...numberFormParams({ unit: "골드", id: "cost" })}
           />
           <TextField fullWidth
-            id=""
             label={`룽 가격 상승량`}
             disabled={true}
             value={kungya.getCostByName(name)}
@@ -340,19 +340,21 @@ const CalculatorStepper = ({ steps, name,limit }) => {
       })}
     </Stepper>)
 }
+
+let getDefaultState = () => ({
+  name: "양파",
+  cost: 100,
+  hands: [0, 0, 0, 0, 0, 0],
+  goal: 5,
+  goalCount: 2,
+  only5Merge: true
+})
 export default function MergeCalculator() {
-  const [state, setState] = useState({
-    name: "양파",
-    cost: 100,
-    hands: [0, 0, 0, 0, 0, 0],
-    goal: 5,
-    goalCount: 2,
-    only5Merge: true
-  })
+  const [state, setState] = useState(getDefaultState())
 
   const handleChange = (key, value) => {
     setState({
-      ...state,
+      ...(key === 'name' ? getDefaultState() : state),
       [key]: value
     })
   }
