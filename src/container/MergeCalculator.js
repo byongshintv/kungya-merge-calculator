@@ -44,7 +44,7 @@ const kungya = {
   },
   getCostByName: function (targetName) {
     for (let [cost, names] of Object.entries(this.names)) {
-      if (names.includes(targetName)) return cost
+      if (names.includes(targetName)) return cost * 1
     }
   }
 }
@@ -208,6 +208,23 @@ const mergeStratgy = (initParam, params) => {
   return { steps, buyCount: params.buyCount }
 }
 
+  
+const getPrice = function({cost,interval,buyCount,maxCost}){
+  let price = 0
+  while(--buyCount >= 0){
+    if( cost >= maxCost){
+      cost = maxCost
+      price += maxCost * (buyCount + 1);
+      break;
+    }
+    price += cost;
+    cost += interval
+  }
+  if( maxCost < cost ) cost = maxCost
+  
+  return {lastCost:cost, price}
+} 
+
 const CalculatorResult = ({ formState }) => {
   const { name, cost, hands, goal, goalCount, only5Merge } = formState
   
@@ -232,8 +249,10 @@ const CalculatorResult = ({ formState }) => {
   </ListItem>)
 
   const { steps, buyCount } = mergeStratgy({ hands, goal, goalCount, canOverBuy: only5Merge })
-  const lastCost = cost + interval * buyCount
-  const price = (cost + (lastCost - interval)) / 2 * buyCount
+
+  const maxCost = 2000
+  const {lastCost, price} = getPrice({cost,interval,buyCount,maxCost})
+  
 
   
   const priceUnits = [
@@ -262,11 +281,17 @@ const CalculatorResult = ({ formState }) => {
   }
   let {unit, amount:unitAmount} = priceToUnit(price)
   let preventNaN = (value) => value.match(/NaN/) ? "-" : value
+  let LimitArrivedText = () => <Typography component="span" variant="body2" color="text.secondary"> (상한값)</Typography>
   return (<>
     <Section label={<DividerTitle>계산 결과</DividerTitle>}>
       <ItemList>
         <Item icon={<InventoryIcon />} label={`필요 ${name}룽`} value={`${buyCount.toLocaleString()}개`} />
-        <Item icon={<LocalOfferIcon />} label={`${name}룽 최종가격`} value={preventNaN(`${lastCost.toLocaleString()}골드`)} />
+        <Item icon={<LocalOfferIcon />} label={`${name}룽 최종가격`} value={
+          <>
+            {preventNaN(`${lastCost.toLocaleString()}골드`)}
+            {maxCost === lastCost &&  <LimitArrivedText />}
+          </>
+          } />
         <Item icon={<PriceCheckIcon />} label={`필요 골드`} value={preventNaN(price.toLocaleString() + "골드")} />
         <Item icon={<ForestIcon />} label={`필요 재화`} value={preventNaN(`${unit} ${unitAmount.toLocaleString() }개`)} />
       </ItemList>
