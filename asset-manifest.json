@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/static/css/main.292dc446.css",
-    "main.js": "/static/js/main.41b6c5e7.js",
-    "static/js/787.a559fbb9.chunk.js": "/static/js/787.a559fbb9.chunk.js",
-    "static/media/bg.avif": "/static/media/bg.4e5bb9981617b3717771.avif",
-    "index.html": "/index.html",
-    "main.292dc446.css.map": "/static/css/main.292dc446.css.map",
-    "main.41b6c5e7.js.map": "/static/js/main.41b6c5e7.js.map",
-    "787.a559fbb9.chunk.js.map": "/static/js/787.a559fbb9.chunk.js.map"
+    "main.css": "/merge.banipest.com/static/css/main.292dc446.css",
+    "main.js": "/merge.banipest.com/static/js/main.ac7152d8.js",
+    "static/js/787.a559fbb9.chunk.js": "/merge.banipest.com/static/js/787.a559fbb9.chunk.js",
+    "static/media/bg.avif": "/merge.banipest.com/static/media/bg.4e5bb9981617b3717771.avif",
+    "index.html": "/merge.banipest.com/index.html",
+    "main.292dc446.css.map": "/merge.banipest.com/static/css/main.292dc446.css.map",
+    "main.ac7152d8.js.map": "/merge.banipest.com/static/js/main.ac7152d8.js.map",
+    "787.a559fbb9.chunk.js.map": "/merge.banipest.com/static/js/787.a559fbb9.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.292dc446.css",
-    "static/js/main.41b6c5e7.js"
+    "static/js/main.ac7152d8.js"
   ]
 }
