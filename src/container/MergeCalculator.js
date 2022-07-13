@@ -16,6 +16,10 @@ import PriceCheckIcon from '@mui/icons-material/PriceCheck';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import ForestIcon from '@mui/icons-material/Forest';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import ContentCutIcon from '@mui/icons-material/ContentCut';
+
+
 
 
 
@@ -24,6 +28,28 @@ import bgPath from "./bg.avif";
 import { blue } from '@mui/material/colors';
 import Section, { HidableSection } from '../component/Section';
 import DividerTitle from '../component/DividerTitle';
+const ItemList = ({ children, sx = {} }) => (
+  <List 
+    sx={{ 
+      bgcolor: 'background.paper', 
+      display:'grid', gridTemplateColumns:{sx:'1f',sm:'1fr 1fr'}
+      ,...sx
+    }}>
+    {children}
+  </List>
+)
+const Item = ({ label, value, icon }) => (<ListItem>
+  <ListItemAvatar>
+    <Avatar sx={{ bgcolor: blue[600] }}>
+      {icon}
+    </Avatar>
+  </ListItemAvatar>
+  <ListItemText primary={value} secondary={label} />
+</ListItem>)
+const numberFormat = (value,unit = "",preventUnit = "") => {
+  if(isNaN(value)) return "-"
+  return preventUnit + value.toLocaleString() + unit
+}
 const kungya = {
   prefixes: [
     (name) => `${name}룽`,
@@ -60,7 +86,7 @@ const kungya = {
   getDataByName: function (targetName) {
     let kungyaData = this.datas.find(({name}) => name === targetName)
     return {
-      name:"더미", cost:0, limit:0, init:0,
+      name:"더미", interval:0, limit:0, init:0,
       ...kungyaData
     }
   }
@@ -89,7 +115,7 @@ const CalculatorForm = ({ formState, onChange }) => {
       value *= 1
       if(value < 0) value *= -1
     }
-    onChange(name, value)
+    onChange({[name]:value})
   }
 
   const Text = ({ children, ...props }) => (
@@ -101,6 +127,8 @@ const CalculatorForm = ({ formState, onChange }) => {
       {children}
     </Typography>)
 
+  const {limit:costLimit, interval:costInterval} = kungya.getDataByName(name)
+  console.log(kungya.getDataByName(name))
   return (
     <Box
       component="form"
@@ -111,26 +139,27 @@ const CalculatorForm = ({ formState, onChange }) => {
       <Section label="쿵야 선택">
         <ChipSelector
           items={kungya.getAllKungyaNames()}
-          onSelected={(key) => { onChange('name', key) }}
+          onSelected={(name) => { 
+            const {init:initCost} = kungya.getDataByName(name)
+            onChange({name,cost:initCost},{isReset:true}) 
+          }}
           selected={name}
           label="쿵야 종류"
         />
-
-        <Stack direction="row" spacing={2}>
-          <TextField fullWidth
-            label={`현재 ${name}룽 가격`}
-            onChange={handleInputChange}
-            value={cost.toString()}
-            {...numberFormParams({ unit: "골드", id: "cost" })}
-          />
-          <TextField fullWidth
-            label={`룽 가격 상승량`}
-            disabled={true}
-            value={kungya.getDataByName(name).interval}
-            {...numberFormParams({ unit: "골드", id: "interval" })}
-            type="text"
-          />
-        </Stack>
+        <ItemList>
+          <Item icon={<ContentCutIcon />} label={`${name}룽 가격 상한값`} value={ numberFormat(costLimit,"골드") } />
+          <Item icon={<TrendingUpIcon />} label={`${name}룽 가격 상승량`} value={ numberFormat(costInterval,"골드") } />
+        </ItemList>
+        
+      </Section>
+      <Section label="현재 가격">
+        <TextField 
+          label={`현재 ${name}룽 가격`}
+          onChange={handleInputChange}
+          value={cost.toString()}
+          {...numberFormParams({ unit: "골드", id: "cost" })}
+          disabled={!costInterval}
+        />
       </Section>
       <Section label="현재 보유 쿵야">
         <Grid container spacing={2}>
@@ -142,7 +171,7 @@ const CalculatorForm = ({ formState, onChange }) => {
                 let thisHands = hands.concat();
                 if(value < 0) value *= -1
                 thisHands[i] = value * 1
-                onChange('hands', thisHands)
+                onChange({hands:thisHands})
               }
               return <Grid item xs={6} md={4} key={i}>
                 <TextField fullWidth
@@ -165,7 +194,8 @@ const CalculatorForm = ({ formState, onChange }) => {
             kungya.prefixes.slice(1).map((prefix, i) => [i + 1, `${prefix(name)}(Lv.${i + 1})`])
           }
           selected={goal}
-          onSelected={(key) => { onChange('goal', key) }}
+          onSelected={(key) => { onChange({goal:key}) }}
+          sx={{mb:3}}
         />
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
@@ -182,7 +212,7 @@ const CalculatorForm = ({ formState, onChange }) => {
               <Stack direction="row" spacing={1} alignItems="center" sx={{ marginLeft: 2 }}>
                 <Text>무지성 5머지</Text>
                 <Switch 
-                  checked={!only5Merge} onChange={(e, value) => onChange('only5Merge', !value)} 
+                  checked={!only5Merge} onChange={(e, value) => onChange({only5Merge:!value})} 
                   name="only5Merge"
                   inputProps={{'aria-label': "머지 방식에 대한 스위치"}}
                 />
@@ -248,22 +278,7 @@ const CalculatorResult = ({ formState }) => {
   const {interval, limit} = kungya.getDataByName(name)
 
 
-  const ItemList = ({ children }) => (
-    <List 
-      sx={{ 
-        bgcolor: 'background.paper', 
-        display:'grid', gridTemplateColumns:{sx:'1f',sm:'1fr 1fr'} }}>
-      {children}
-    </List>
-  )
-  const Item = ({ label, value, icon }) => (<ListItem>
-    <ListItemAvatar>
-      <Avatar sx={{ bgcolor: blue[600] }}>
-        {icon}
-      </Avatar>
-    </ListItemAvatar>
-    <ListItemText primary={value} secondary={label} />
-  </ListItem>)
+
 
   const { steps, buyCount } = mergeStratgy({ hands, goal, goalCount, canOverBuy: only5Merge })
   const {lastCost, price} = getPrice({cost,interval,buyCount,limit})
@@ -295,7 +310,6 @@ const CalculatorResult = ({ formState }) => {
     }
   }
   let {unit, amount:unitAmount} = priceToUnit(price)
-  let preventNaN = (value) => value.match(/NaN/) ? "-" : value
   let LimitArrivedText = () => <Typography component="span" variant="body2" color="text.secondary"> (상한값)</Typography>
   return (<>
     <Section label={<DividerTitle>계산 결과</DividerTitle>}>
@@ -303,12 +317,12 @@ const CalculatorResult = ({ formState }) => {
         <Item icon={<InventoryIcon />} label={`필요 ${name}룽`} value={`${buyCount.toLocaleString()}개`} />
         <Item icon={<LocalOfferIcon />} label={`${name}룽 최종가격`} value={
           <>
-            {preventNaN(`${lastCost.toLocaleString()}골드`)}
+            {numberFormat(lastCost,"골드")}
             {limit === lastCost &&  <LimitArrivedText />}
           </>
           } />
-        <Item icon={<PriceCheckIcon />} label={`필요 골드`} value={preventNaN(price.toLocaleString() + "골드")} />
-        <Item icon={<ForestIcon />} label={`필요 재화`} value={preventNaN(`${unit} ${unitAmount.toLocaleString() }개`)} />
+        <Item icon={<PriceCheckIcon />} label={`필요 골드`} value={numberFormat(price,"골드")} />
+        <Item icon={<ForestIcon />} label={`필요 재화`} value={numberFormat(unitAmount,"개",unit + " ")} />
       </ItemList>
     </Section>
 
@@ -392,12 +406,12 @@ let getDefaultState = () => ({
 export default function MergeCalculator() {
   const [state, setState] = useState(getDefaultState())
 
-  const handleChange = (key, value) => {
+  const handleChange = (ChangedState,{isReset = false} = {}) => {
     setState({
-      ...(key === 'name' ? getDefaultState() : state),
-      [key]: value
+      ...(isReset ? getDefaultState() : state),
+      ...ChangedState
     })
-    
+
   }
   return (
       <Card>
