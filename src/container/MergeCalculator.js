@@ -34,17 +34,34 @@ const kungya = {
     (name) => `싱싱한 ${name}쿵야`,
     (name) => `찬란한 ${name}쿵야`]
   ,
-  names: {
-    5: ["양파", "샐러리", "배추", "블랙베리"],
-    10: ["브로콜리", "버섯", "비트", "땅콩", "바나나", "망고", "고구마", "사과", "무", "완두"],
-    "-": ["용과", "완계", "라즈베리", "주먹밥"],
-  },
+  datas: [
+    {name:"양파",interval:5,limit:2000,init:40},
+    {name:"샐러리",interval:5,limit:2000,init:50},
+    {name:"배추",interval:5,limit:2000,init:60},
+    {name:"블랙베리",interval:5,limit:2000,init:70},
+    {name:"브로콜리",interval:10,limit:2000,init:80},
+    {name:"버섯",interval:10,limit:2500,init:90},
+    {name:"비트",interval:10,limit:2500,init:100},
+    {name:"땅콩",interval:10,limit:2500,init:110},
+    {name:"바나나",interval:10,limit:2500,init:120},
+    {name:"망고",interval:10,limit:3000,init:130},
+    {name:"고구마",interval:10,limit:3000,init:140},
+    {name:"사과",interval:10,limit:5000,init:500},
+    {name:"무",interval:10,limit:3000,init:150},
+    {name:"완두",interval:10,limit:3000,init:160},
+    {name:"용과"},
+    {name:"완계"},
+    {name:"라즈베리"},
+    {name:"주먹밥"},
+  ],
   getAllKungyaNames: function () {
-    return Object.values(this.names).concat().flat()
+    return this.datas.map(v => v.name)
   },
-  getCostByName: function (targetName) {
-    for (let [cost, names] of Object.entries(this.names)) {
-      if (names.includes(targetName)) return cost * 1
+  getDataByName: function (targetName) {
+    let kungyaData = this.datas.find(({name}) => name === targetName)
+    return {
+      name:"더미", cost:0, limit:0, init:0,
+      ...kungyaData
     }
   }
 }
@@ -109,7 +126,7 @@ const CalculatorForm = ({ formState, onChange }) => {
           <TextField fullWidth
             label={`룽 가격 상승량`}
             disabled={true}
-            value={kungya.getCostByName(name)}
+            value={kungya.getDataByName(name).interval}
             {...numberFormParams({ unit: "골드", id: "interval" })}
             type="text"
           />
@@ -209,18 +226,18 @@ const mergeStratgy = (initParam, params) => {
 }
 
   
-const getPrice = function({cost,interval,buyCount,maxCost}){
+const getPrice = function({cost,interval,buyCount,limit}){
   let price = 0
   while(--buyCount >= 0){
-    if( cost >= maxCost){
-      cost = maxCost
-      price += maxCost * (buyCount + 1);
+    if( cost >= limit){
+      cost = limit
+      price += limit * (buyCount + 1);
       break;
     }
     price += cost;
     cost += interval
   }
-  if( maxCost < cost ) cost = maxCost
+  if( limit < cost ) cost = limit
   
   return {lastCost:cost, price}
 } 
@@ -228,7 +245,7 @@ const getPrice = function({cost,interval,buyCount,maxCost}){
 const CalculatorResult = ({ formState }) => {
   const { name, cost, hands, goal, goalCount, only5Merge } = formState
   
-  const interval = kungya.getCostByName(name)
+  const {interval, limit} = kungya.getDataByName(name)
 
 
   const ItemList = ({ children }) => (
@@ -249,9 +266,7 @@ const CalculatorResult = ({ formState }) => {
   </ListItem>)
 
   const { steps, buyCount } = mergeStratgy({ hands, goal, goalCount, canOverBuy: only5Merge })
-
-  const maxCost = 2000
-  const {lastCost, price} = getPrice({cost,interval,buyCount,maxCost})
+  const {lastCost, price} = getPrice({cost,interval,buyCount,limit})
   
 
   
@@ -289,7 +304,7 @@ const CalculatorResult = ({ formState }) => {
         <Item icon={<LocalOfferIcon />} label={`${name}룽 최종가격`} value={
           <>
             {preventNaN(`${lastCost.toLocaleString()}골드`)}
-            {maxCost === lastCost &&  <LimitArrivedText />}
+            {limit === lastCost &&  <LimitArrivedText />}
           </>
           } />
         <Item icon={<PriceCheckIcon />} label={`필요 골드`} value={preventNaN(price.toLocaleString() + "골드")} />
@@ -382,6 +397,7 @@ export default function MergeCalculator() {
       ...(key === 'name' ? getDefaultState() : state),
       [key]: value
     })
+    
   }
   return (
       <Card>
