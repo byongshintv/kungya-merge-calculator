@@ -74,7 +74,7 @@ const kungya = {
     {name:"고구마",interval:10,limit:3000,init:140},
     {name:"사과",interval:10,limit:5000,init:500},
     {name:"무",interval:10,limit:3000,init:150},
-    {name:"완두",interval:10,limit:3000,init:160},
+    {name:"완두",interval:10,limit:3500,init:160},
     {name:"용과"},
     {name:"완계"},
     {name:"라즈베리"},
