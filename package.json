@@ -1,6 +1,6 @@
 {
   "name": "merge-calculator",
-  "version": "1.1.1",
+  "version": "1.2",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.9.3",
@@ -43,5 +43,6 @@
   },
   "devDependencies": {
     "gh-pages": "^4.0.0"
-  }
+  },
+  "homepage": "https://merge.banipest.com/"
 }
