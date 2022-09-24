@@ -81,8 +81,8 @@ const kungya = {
     {name:"라즈베리"},
     {name:"주먹밥"},
     {name:"구아바",interval:20,limit:3500,init:200},
-    {name:"당근",interval:25,limit:4000,init:200},
-    {name:"레몬",interval:25,limit:4000,init:200},
+    {name:"당근",interval:25,limit:3600,init:200},
+    {name:"레몬",interval:25,limit:3600,init:200},
     {name:"백합"},
   ],
   getAllKungyaNames: function () {
